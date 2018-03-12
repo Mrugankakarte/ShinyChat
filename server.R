@@ -1,5 +1,14 @@
 library(shiny)
 library(stringr)
+library(keras)
+library(ggplot2)
+library(tm)
+library(qdap)
+
+load("tx_model.RData")
+
+model_best <- load_model_hdf5("model_tx_ml_class.hdf5")
+tokenizer <- load_text_tokenizer("tx_tokenizer")
 
 # Globally define a place where all users can share some reactive data.
 vars <- reactiveValues(chat=NULL, users=NULL)
@@ -101,17 +110,19 @@ shinyServer(function(input, output, session) {
       return()
     }
     isolate({
-      # Add the current entry to the chat log.
-      vars$chat <<- c(vars$chat, 
-                      paste0(linePrefix(),
-                        tags$span(class="username",
-                          tags$abbr(title=Sys.time(), sessionVars$username)
-                        ),
-                        ": ",
-                        tagList(input$entry)))
-    })
-    # Clear out the text entry field.
-    updateTextInput(session, "entry", value="")
+        # Add the current entry to the chat log.
+        vars$chat <<- c(vars$chat, 
+                        paste0(linePrefix(),
+                               tags$span(class="username",
+                                         tags$abbr(title=Sys.time(), sessionVars$username)
+                               ),
+                               ": ",
+                               tagList(input$entry)))
+      
+      })
+      # Clear out the text entry field.
+      updateTextInput(session, "entry", value="")
+    
   })
   
   # Dynamically create the UI for the chat window.
@@ -125,5 +136,54 @@ shinyServer(function(input, output, session) {
     
     # Pass the chat log through as HTML
     HTML(vars$chat)
+  })
+  
+  chatInput <- reactive({
+    chat_text <- clean_text(input$entry)
+    #print(chat_text)
+    chat_matrix <- texts_to_matrix(tokenizer, list(chat_text), mode = "binary")
+    chat_pred <- predict(model_best,chat_matrix)
+    
+    level <- chat_pred
+    type <- labels
+    level <- as.vector(level)
+    df <- data.frame(type = type, level = level)
+    df
+  })
+  
+  # Fill in the spot we created for a plot
+  output$toxicPlot <- renderPlot({
+    
+    df <- chatInput()
+    df$type <- factor(df$type, levels = df$type)
+    toxic_level <- findInterval(df$level, c(0, 0.25, 0.5, 0.75, 1.5))
+    
+    g <- ggplot(df, aes(x = type, y = toxic_level, fill = toxic_level))
+    g <- g + geom_bar(stat = "identity")
+    g <- g + scale_fill_gradient2(low="green", high = "red",mid = "orange", midpoint = 2,
+                                  na.value = "transparent",
+                                  breaks=c(0,1,2,3,4),labels=c("None","Low","Med","High","Very High"),
+                                  limits=c(0,4))
+    g <- g +  ylim(0,4)
+    g <- g + labs(x = "Toxic Types", y = "Toxic Level", colour = "Toxic Levels\n", 
+                  title = "Toxic Comments Analysis")
+    g <- g + theme(axis.text.x = element_text(face="bold", size = 11, 
+                                              color = "brown", angle = 45, hjust = 1),
+                   plot.title=element_text(size=15, face="bold", color="darkgreen"),
+                   axis.title.x=element_text(size=12),
+                   axis.title.y =element_text(size=12),
+                   legend.title=element_blank())
+    g
+    #Render a barplot
+    
+  })
+  observe({
+    df <- chatInput()
+    #print(sum(df$level))
+    if(sum(df$level)>=1.5){
+      shinyjs::disable("send")
+    } else {
+      shinyjs::enable("send")
+    }
   })
 })

@@ -1,0 +1,12 @@
+name: ShinyChat
+title: ShinyChat
+username:
+account: huytquoc
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 296096
+bundleId: 1259966
+url: https://huytquoc.shinyapps.io/ShinyChat/
+when: 1520540715.07813
+asMultiple: FALSE
+asStatic: FALSE

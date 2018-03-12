@@ -1,0 +1,12 @@
+name: FriendlyChat
+title: FriendlyChat
+username:
+account: huytquoc
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 296101
+bundleId: 1260020
+url: https://huytquoc.shinyapps.io/FriendlyChat/
+when: 1520543125.4987
+asMultiple: FALSE
+asStatic: FALSE
