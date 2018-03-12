@@ -14,11 +14,11 @@ tokenizer <- load_text_tokenizer("tx_tokenizer")
 vars <- reactiveValues(chat=NULL, users=NULL)
 
 # Restore the chat log from the last session.
-if (file.exists("chat.Rds")){
-  vars$chat <- readRDS("chat.Rds")
-} else {
-  vars$chat <- "Welcome to Shiny Chat!"
-}
+# if (file.exists("chat.Rds")){
+#   vars$chat <- readRDS("chat.Rds")
+# } else {
+  vars$chat <- "Welcome to Non-toxic Shiny Chat!"
+# }
 
 #' Get the prefix for the line to be added to the chat window. Usually a newline
 #' character unless it's the first line.
@@ -103,6 +103,7 @@ shinyServer(function(input, output, session) {
     })))
   })
   
+  
   # Listen for input$send changes (i.e. when the button is clicked)
   observe({
     if(input$send < 1){
@@ -111,6 +112,7 @@ shinyServer(function(input, output, session) {
     }
     isolate({
         # Add the current entry to the chat log.
+      #if(sum(chatInput()$level)<=1.5){
         vars$chat <<- c(vars$chat, 
                         paste0(linePrefix(),
                                tags$span(class="username",
@@ -118,10 +120,14 @@ shinyServer(function(input, output, session) {
                                ),
                                ": ",
                                tagList(input$entry)))
+      #}
+        
       
       })
       # Clear out the text entry field.
+    #if(sum(chatInput()$level)<=1.5){
       updateTextInput(session, "entry", value="")
+    #}
     
   })
   

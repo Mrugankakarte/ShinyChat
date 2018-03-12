@@ -19,7 +19,7 @@ shinyUI(
           # Create the header
           div(class="span6", style="padding: 5px 0px;",
               h1("Friendly Chat"), 
-              h5("Based on ShinyChat, and featured with Toxic Comments Analysis and Filter"),
+              h5("Based on ShinyChat - featured with Toxic Comments Analysis and Filter functions."),
               h5("By: Huy Tran, email: huytquoc@gmail.com")
           ), div(class="span6", id="play-nice",
             "No toxic comments are allowed in this Chat room... be friendly! be respectful!."
@@ -44,7 +44,7 @@ shinyUI(
             # )
             textInput("entry", ""),
             actionButton("send", "Send"),
-            h5("Note: Your chat contents are analyzed, detected for toxic comments."),
+            h5("NOTE: Your chat contents are analyzed, detected for toxic comments."),
             h5("The analysis chart is displayed on the right-hand side panel."),
             h5("If your chat contains 'toxic' contents, the 'Send' button will be blocked until you clean up the text."),
             h5("Enjoy friendly chatting. Thank you!")
